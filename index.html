@@ -332,13 +332,11 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <div></div>
-            <button class="settings-btn" onclick="openSettings()">AI Settings</button>
-        </div>
-
         <div class="prompt-section">
-            <label class="prompt-label">Prompt</label>
+            <div class="panel-header">
+                <label class="prompt-label">Prompt</label>
+                <button class="settings-btn" onclick="openSettings()">AI Settings</button>
+            </div>
             <textarea class="prompt-input" id="promptInput" placeholder="Enter your translation prompt (e.g., Translate to Spanish, Translate to French with formal tone, etc.)">Accurately translate this Chinese text to English while preserving meaning and nuance and do not give extra details or explanations.</textarea>
         </div>
 
@@ -389,7 +387,7 @@
 
             <div class="form-group">
                 <label class="form-label">Model</label>
-                <input type="text" class="form-input" id="model" placeholder="deepseek/deepseek-chat-v3.1:free" value="deepseek/deepseek-chat-v3.1:free">
+                <input type="text" class="form-input" id="model" placeholder="deepseek/deepseek-chat-v3.1:free" value="gpt-3.5-turbo">
             </div>
 
             <div class="form-group">
