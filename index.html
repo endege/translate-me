@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Translator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            padding: 20px;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        .settings-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .settings-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .prompt-section {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+
+        .prompt-label {
+            color: #e0e0e0;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: block;
+            font-size: 16px;
+        }
+
+        .prompt-input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 60px;
+            transition: border-color 0.3s, background 0.3s;
+            color: #e0e0e0;
+        }
+
+        .prompt-input::placeholder {
+            color: rgba(224, 224, 224, 0.5);
+        }
+
+        .prompt-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .main-content {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            align-items: stretch;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .text-panel {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .panel-label {
+            color: #e0e0e0;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .text-area {
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            min-height: 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            resize: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: border-color 0.3s, background 0.3s;
+            overflow: auto;
+            color: #e0e0e0;
+        }
+
+        .text-area::placeholder {
+            color: rgba(224, 224, 224, 0.5);
+        }
+
+        .text-area:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .translate-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: block;
+            margin: 0 auto;
+            flex-shrink: 0;
+        }
+
+        .translate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .translate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            color: #667eea;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .save-btn:hover {
+            opacity: 0.9;
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+
+        .font-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .font-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: #e0e0e0;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .font-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div></div>
+            <button class="settings-btn" onclick="openSettings()">AI Settings</button>
+        </div>
+
+        <div class="prompt-section">
+            <label class="prompt-label">Prompt</label>
+            <textarea class="prompt-input" id="promptInput" placeholder="Enter your translation prompt (e.g., Translate to Spanish, Translate to French with formal tone, etc.)">Accurately translate this Chinese text to English while preserving meaning and nuance and do not give extra details or explanations.</textarea>
+        </div>
+
+        <div class="main-content">
+            <div class="text-panel">
+                <div class="panel-header">
+                    <label class="panel-label">Text to translate</label>
+                    <div class="font-controls">
+                        <button class="font-btn" onclick="changeFontSize('sourceText', -2)">−</button>
+                        <button class="font-btn" onclick="changeFontSize('sourceText', 2)">+</button>
+                    </div>
+                </div>
+                <textarea class="text-area" id="sourceText" placeholder="Enter text to translate..."></textarea>
+            </div>
+
+            <div class="text-panel">
+                <div class="panel-header">
+                    <label class="panel-label">Translated text</label>
+                    <div class="font-controls">
+                        <button class="font-btn" onclick="changeFontSize('translatedText', -2)">−</button>
+                        <button class="font-btn" onclick="changeFontSize('translatedText', 2)">+</button>
+                    </div>
+                </div>
+                <textarea class="text-area" id="translatedText" placeholder="Translation will appear here..." readonly></textarea>
+            </div>
+        </div>
+
+        <button class="translate-btn" id="translateBtn" onclick="translateText()">Translate</button>
+        <div class="status-message" id="statusMessage"></div>
+    </div>
+
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">AI Settings</h2>
+                <button class="close-btn" onclick="closeSettings()">&times;</button>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">API Endpoint</label>
+                <input type="text" class="form-input" id="apiEndpoint" placeholder="https://api.openai.com/v1/chat/completions" value="https://api.openai.com/v1/chat/completions">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">API Key</label>
+                <input type="password" class="form-input" id="apiKey" placeholder="sk-...">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Model</label>
+                <input type="text" class="form-input" id="model" placeholder="gpt-3.5-turbo" value="gpt-3.5-turbo">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Temperature (0-2)</label>
+                <input type="number" class="form-input" id="temperature" min="0" max="2" step="0.1" value="0.3">
+            </div>
+
+            <button class="save-btn" onclick="saveSettings()">Save Settings</button>
+        </div>
+    </div>
+
+    <script>
+        // Load settings from localStorage
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('aiSettings')) || {};
+            document.getElementById('apiEndpoint').value = settings.apiEndpoint || 'https://api.openai.com/v1/chat/completions';
+            document.getElementById('apiKey').value = settings.apiKey || '';
+            document.getElementById('model').value = settings.model || 'gpt-3.5-turbo';
+            document.getElementById('temperature').value = settings.temperature || 0.3;
+        }
+
+        function openSettings() {
+            loadSettings();
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+
+        function saveSettings() {
+            const settings = {
+                apiEndpoint: document.getElementById('apiEndpoint').value,
+                apiKey: document.getElementById('apiKey').value,
+                model: document.getElementById('model').value,
+                temperature: parseFloat(document.getElementById('temperature').value)
+            };
+            localStorage.setItem('aiSettings', JSON.stringify(settings));
+            showStatus('Settings saved successfully!', 'success');
+            setTimeout(() => closeSettings(), 1000);
+        }
+
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status-message ${type}`;
+            setTimeout(() => {
+                statusEl.className = 'status-message';
+            }, 3000);
+        }
+
+        async function translateText() {
+            const sourceText = document.getElementById('sourceText').value.trim();
+            const prompt = document.getElementById('promptInput').value.trim();
+
+            if (!sourceText) {
+                showStatus('Please enter text to translate', 'error');
+                return;
+            }
+
+            if (!prompt) {
+                showStatus('Please enter a translation prompt', 'error');
+                return;
+            }
+
+            const settings = JSON.parse(localStorage.getItem('aiSettings')) || {};
+
+            if (!settings.apiKey) {
+                showStatus('Please configure API settings first', 'error');
+                openSettings();
+                return;
+            }
+
+            const translateBtn = document.getElementById('translateBtn');
+            const translatedTextArea = document.getElementById('translatedText');
+            translateBtn.disabled = true;
+            translateBtn.textContent = 'Translating...';
+            translatedTextArea.value = '';
+
+            try {
+                const requestBody = {
+                    model: settings.model,
+                    temperature: settings.temperature,
+                    messages: [
+                        {
+                            role: 'system',
+                            content: 'You are a professional translator. Provide only the translation without any additional explanations or comments.'
+                        },
+                        {
+                            role: 'user',
+                            content: `${prompt}\n\n${sourceText}`
+                        }
+                    ],
+                    max_tokens: 16000,
+                    stream: true
+                };
+
+                const response = await fetch(settings.apiEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${settings.apiKey}`,
+                        'HTTP-Referer': window.location.href,
+                        'X-Title': 'AI Translator'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    let errorMessage = 'Translation failed';
+                    try {
+                        const error = await response.json();
+                        errorMessage = error.error?.message || error.message || `HTTP ${response.status}: ${response.statusText}`;
+                    } catch (e) {
+                        errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let translation = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const data = line.slice(6);
+                            if (data === '[DONE]') continue;
+
+                            try {
+                                const parsed = JSON.parse(data);
+                                const content = parsed.choices?.[0]?.delta?.content;
+                                if (content) {
+                                    translation += content;
+                                    translatedTextArea.value = translation;
+                                    translatedTextArea.scrollTop = translatedTextArea.scrollHeight;
+                                }
+                            } catch (e) {
+                                // Skip invalid JSON
+                            }
+                        }
+                    }
+                }
+
+                showStatus('Translation completed!', 'success');
+            } catch (error) {
+                console.error('Translation error:', error);
+                let errorMsg = error.message;
+                if (error.message === 'Failed to fetch') {
+                    errorMsg = 'Network error. Try: 1) Check API endpoint 2) Check internet connection 3) Try a different model';
+                }
+                showStatus(`Error: ${errorMsg}`, 'error');
+            } finally {
+                translateBtn.disabled = false;
+                translateBtn.textContent = 'Translate';
+            }
+        }
+
+        function changeFontSize(textareaId, change) {
+            const textarea = document.getElementById(textareaId);
+            const currentSize = parseInt(window.getComputedStyle(textarea).fontSize);
+            const newSize = Math.max(10, Math.min(32, currentSize + change));
+            textarea.style.fontSize = newSize + 'px';
+
+            // Save to localStorage
+            localStorage.setItem(`fontSize_${textareaId}`, newSize);
+        }
+
+        function loadFontSizes() {
+            const sourceSize = localStorage.getItem('fontSize_sourceText');
+            const translatedSize = localStorage.getItem('fontSize_translatedText');
+
+            if (sourceSize) {
+                document.getElementById('sourceText').style.fontSize = sourceSize + 'px';
+            }
+            if (translatedSize) {
+                document.getElementById('translatedText').style.fontSize = translatedSize + 'px';
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('settingsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeSettings();
+            }
+        });
+
+        // Load settings on page load
+        loadSettings();
+        loadFontSizes();
+    </script>
+</body>
+</html>
