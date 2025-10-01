@@ -405,9 +405,9 @@
         // Load settings from localStorage
         function loadSettings() {
             const settings = JSON.parse(localStorage.getItem('aiSettings')) || {};
-            document.getElementById('apiEndpoint').value = settings.apiEndpoint || 'https://api.openai.com/v1/chat/completions';
+            document.getElementById('apiEndpoint').value = settings.apiEndpoint || 'https://openrouter.ai/api/v1/chat/completions';
             document.getElementById('apiKey').value = settings.apiKey || '';
-            document.getElementById('model').value = settings.model || 'gpt-3.5-turbo';
+            document.getElementById('model').value = settings.model || 'deepseek/deepseek-chat-v3.1:free';
             document.getElementById('temperature').value = settings.temperature || 0.3;
         }
 
